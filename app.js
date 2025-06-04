@@ -11,7 +11,8 @@ process.env.MONGO_URL;
 
 app.use(express.json())
 
-const CadVlut = require("./CadVolu.js")
+const CadVlut = require("./Modelo/CadVolu")
+const Instuiçoes = require('./Modelo/insti')
 
 const connectDB =  async ()=>{
     try {
@@ -31,6 +32,17 @@ try {
 } catch (error) {
      res.status(401).json({message: "Erro ao encotrar volutarios", error: error.message});
 }
+})
+
+app.get("/Intituiçoes" , async (req ,res) =>{
+try {
+    const Insti = await Instuiçoes.findAll();
+    res.status(200).json(Insti);
+} catch (error) {
+    res.status(401).json({message: "Erro ao encotrar volutarios", error: error.message })
+}
+ 
+
 })
 
 app.post("/casdatro/Volutario",  async (req, res) => {
