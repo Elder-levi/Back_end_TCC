@@ -11,7 +11,7 @@ process.env.MONGO_URL;
 
 app.use(express.json())
 
-const CadVlut = require("./CadVolu.js")
+const CadVlut = require("./models/CadVolu")
 
 const connectDB =  async ()=>{
     try {
