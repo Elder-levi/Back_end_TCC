@@ -49,6 +49,11 @@ const connectDB =  async ()=>{
 
 connectDB();
 
+
+app.get("/", (req, res) => {
+res.json({ mensagem: "Servidor rodando" });
+
+});
 app.post("/login", async (req, res) => {
  const { login, senha } = req.body;
 
