@@ -100,7 +100,6 @@ try {
 }
 })
 
-const Voluntarios = require('./Modelo/Voluntarios'); // modelo definitivo (crie e importe)
 
 app.patch("/inscricoes/voluntarios/pendentes/:id", async (req, res) => {
   const { status } = req.body;
