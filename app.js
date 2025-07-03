@@ -13,18 +13,7 @@ const mongoose = require("mongoose")
 process.env.MONGO_URL;
 
 
-const corsOptions = {
-  origin: [
-    'http://localhost:5173',
-    'https://projeto-tcc-qpgc-git-main-elder-levis-projects.vercel.app' // <- sua URL do Vercel
-  ],
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); 
+app.use(cors());
 app.use(express.json())
 
 
@@ -96,8 +85,6 @@ function autenticarToken(req, res, next) {
   });
 }
 
-
-
 // Voluntarios
 app.get("/Volutarios", async (req, res) => {
 try {
@@ -108,7 +95,9 @@ try {
 }
 })
 
-app.patch("/inscricoes/voluntarios/pendentes/:id" , async (req, res) => {
+const Voluntarios = require('./Modelo/Voluntarios'); // modelo definitivo (crie e importe)
+
+app.patch("/inscricoes/voluntarios/pendentes/:id", async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
 
@@ -117,15 +106,30 @@ app.patch("/inscricoes/voluntarios/pendentes/:id" , async (req, res) => {
   }
 
   try {
-    const voluntarioAtualizado = await VoluTemp.findByIdAndUpdate(id, { status }, { new: true });
-
-    if (!voluntarioAtualizado) {
-      return res.status(404).json({ error: 'Voluntário não encontrado' });
+    const voluntarioTemp = await VoluTemp.findById(id);
+    if (!voluntarioTemp) {
+      return res.status(404).json({ error: 'Voluntário não encontrado na análise' });
     }
 
-    res.json({ sucesso: true, voluntario: voluntarioAtualizado });
+    if (status === 'aceito') {
+      // Mover para coleção definitiva
+      const novoVoluntario = new Voluntarios(voluntarioTemp.toObject());
+      await novoVoluntario.save();
+      await VoluTemp.findByIdAndDelete(id);
+      return res.json({ sucesso: true, mensagem: 'Voluntário aceito e movido para a coleção final.' });
+    }
+
+    if (status === 'rejeitado') {
+      await VoluTemp.findByIdAndDelete(id);
+      return res.json({ sucesso: true, mensagem: 'Voluntário rejeitado e removido da análise.' });
+    }
+
+    // pendente só atualiza status
+    const atualizado = await VoluTemp.findByIdAndUpdate(id, { status }, { new: true });
+    res.json({ sucesso: true, voluntario: atualizado });
+
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao atualizar voluntário', detalhes: error.message });
+    res.status(500).json({ error: 'Erro ao processar inscrição', detalhes: error.message });
   }
 });
 
@@ -169,19 +173,28 @@ app.patch("/inscricoes/instituicoes/pendentes/:id", async (req, res) => {
   }
 
   try {
-    const instituicaoAtualizada = await InstTemp.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
-
-    if (!instituicaoAtualizada) {
-      return res.status(404).json({ error: 'Instituição não encontrada' });
+    const instituicaoTemp = await InstTemp.findById(id);
+    if (!instituicaoTemp) {
+      return res.status(404).json({ error: 'Instituição não encontrada na análise' });
     }
 
-    res.json({ sucesso: true, instituicao: instituicaoAtualizada });
+    if (status === 'aceito') {
+      const novaInstituicao = new Instituicoes(instituicaoTemp.toObject());
+      await novaInstituicao.save();
+      await InstTemp.findByIdAndDelete(id);
+      return res.json({ sucesso: true, mensagem: 'Instituição aceita e movida para a coleção final.' });
+    }
+
+    if (status === 'rejeitado') {
+      await InstTemp.findByIdAndDelete(id);
+      return res.json({ sucesso: true, mensagem: 'Instituição rejeitada e removida da análise.' });
+    }
+
+    const atualizado = await InstTemp.findByIdAndUpdate(id, { status }, { new: true });
+    res.json({ sucesso: true, instituicao: atualizado });
+
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao atualizar instituição', detalhes: error.message });
+    res.status(500).json({ error: 'Erro ao processar inscrição', detalhes: error.message });
   }
 });
 
