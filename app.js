@@ -13,16 +13,18 @@ const mongoose = require("mongoose")
 process.env.MONGO_URL;
 
 
-
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://projeto-tcc-qpgc-git-main-elder-levis-projects.vercel.app'], // ajuste conforme seu front
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  origin: [
+    'http://localhost:5173',
+    'https://projeto-tcc-qpgc-git-main-elder-levis-projects.vercel.app' // <- sua URL do Vercel
+  ],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
 
-
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); 
 app.use(express.json())
 
 
