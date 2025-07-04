@@ -7,19 +7,11 @@ const bcrypt = require('bcrypt');
 const PORT = 2500
 const mongoose = require("mongoose")
 
-
-
-
 process.env.MONGO_URL;
 
 
 app.use(cors());
 app.use(express.json())
-
-
-
-
-
 
 
 //Login Levi
@@ -39,8 +31,6 @@ const connectDB =  async ()=>{
     try {
      await mongoose.connect(process.env.MONGO_URI)
      console.log("Connected to MongoDB");
-
-    app.listen(PORT, ()=>{console.log(`http://localhost:${PORT}`)});
 
     } catch (error) {
       console.log("Erro ao conectar ao MongoDB:", error);   
